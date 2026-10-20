@@ -31,6 +31,7 @@ python3 -m http.server 8000
 index.html          Page markup; loads the CSS and the three scripts in order
 css/style.css       Studio theme (navy / gold / neon blue), layout, animations
 js/questions.js     Question bank and game constants (rounds, strikes)
+js/audio.js         Original synthesized sound package (Web Audio API)
 js/matching.js      Answer matching: normalization + typo tolerance
 js/game.js          Game state, rendering, and event wiring
 assets/stage.webp   Studio art with the host; scoreboard values are overlaid live
@@ -60,6 +61,22 @@ Rules the tests enforce:
 Add aliases for the ways people on your floor actually say things ("cop" for "Police officer", "out of cal" for "Expired calibration").
 
 **The current point values are placeholder estimates.** To make the survey real, poll your team and replace the numbers.
+
+## Sound
+
+Every sound is original and synthesized live in the browser with the Web Audio API (`js/audio.js`). There are no audio files, so there is nothing to license or download.
+
+| Moment | Cue |
+|---|---|
+| Show open (**Start the show**) | Brass fanfare intro |
+| During questions | Low "thinking" loop: walking bass, offbeat keys, hi-hat |
+| Answer revealed | Bell DING |
+| Strike | Low BUZZ |
+| Into the final round | Rising tension cue, then the loop returns faster |
+| Board cleared / PASS | Win sting |
+| REWORK result | Descending "wah-wah" |
+
+Browsers block audio until the player taps something, so the game opens behind a **Start the show** button. **Sound on/off** mutes everything, and the setting is remembered. To tune a cue, edit its function in `js/audio.js`. Notes are written as MIDI numbers (60 = middle C).
 
 ## How answer matching works
 

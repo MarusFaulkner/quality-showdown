@@ -20,6 +20,9 @@
     <div class="strike" id="s1" aria-hidden="true"></div>
     <div class="strike" id="s2" aria-hidden="true"></div>
     <div class="react" id="react" aria-hidden="true">✓</div>
+    <div class="curtain" id="curtain">
+      <button type="button" class="gold" id="start-btn">Start the show</button>
+    </div>
   </section>
 
   <div class="panel msg" id="bubble" role="status" aria-live="polite">Welcome to the floor. Type your best answer.</div>
@@ -36,7 +39,10 @@
       <input id="guess-input" type="text" placeholder="Your answer…" maxlength="40" enterkeyhint="send" aria-label="Your answer">
       <button type="submit" id="guess-btn">Submit</button>
     </form>
-    <div class="row"><button type="button" class="ghost" id="action-btn">Give up round</button></div>
+    <div class="row">
+      <button type="button" class="ghost" id="sound-btn" aria-pressed="true">Sound on</button>
+      <button type="button" class="ghost" id="action-btn">Give up round</button>
+    </div>
   </section>
 
   <section class="panel final" id="final" hidden>
@@ -56,8 +62,9 @@
 
 <div class="bigx" id="bigx" aria-hidden="true">X</div>
 
-<!-- Load order matters: data, then matching helpers, then game logic -->
+<!-- Load order matters: data, sound, matching helpers, then game logic -->
 <script src="js/questions.js"></script>
+<script src="js/audio.js"></script>
 <script src="js/matching.js"></script>
 <script src="js/game.js"></script>
 </body>

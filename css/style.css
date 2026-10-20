@@ -109,6 +109,17 @@ body {
 #s2 { top: 58.8%; }
 .strike.on { opacity: 0; }
 
+/* Start overlay: audio needs a tap before it can play */
+.curtain {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 6%;
+  background: linear-gradient(transparent 55%, #030b26cc);
+}
+.curtain button { font-size: clamp(18px, 5cqw, 26px); padding: 14px 28px; }
+
 /* Reaction stamp over the host */
 .react {
   position: absolute;
@@ -277,7 +288,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 button:disabled { opacity: .4; cursor: default; }
 button.ghost { background: transparent; box-shadow: none; border-color: #3a5a9a; color: var(--muted); font-size: 15px; }
 button.gold { background: linear-gradient(var(--gold-hi), var(--gold) 60%, #c88a00); color: #2a1a00; border-color: #fff2b0; box-shadow: 0 0 14px #f6c21b88; }
-.row { display: flex; justify-content: flex-end; }
+.row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 
 .bigx {
   position: fixed;

@@ -104,6 +104,8 @@ function endRound(reason) {
     gaveup:  ["Fair call. Here's the rest of the board.", null]
   };
   say(...msgs[reason]);
+  Sound.stopMusic();
+  if (reason === "cleared") setTimeout(Sound.win, 450);   // let the last DING ring first
   renderHud();
 }
 
@@ -123,6 +125,7 @@ function submitGuess(raw) {
     state.score += pts;
     const t = $("tile-" + i);
     if (t) t.classList.add("open");
+    Sound.ding();
     say(`Survey says… "${q.a[i][0]}"! +${pts}`, "good");
     renderHud();
     if (state.revealed.length === q.a.length) endRound("cleared");
@@ -130,6 +133,7 @@ function submitGuess(raw) {
   }
 
   state.strikes++;
+  Sound.buzz();
   const x = $("bigx");
   x.classList.remove("show"); void x.offsetWidth; x.classList.add("show");
   say(`"${guess}"? Not on the board.`, "bad");
@@ -142,6 +146,7 @@ function nextRound() {
     state.finished = true;
     if (state.score > loadBest()) saveBest(state.score);
     render();
+    state.score / maxPossible() >= 0.5 ? Sound.win() : Sound.fail();
     return;
   }
   state.round++;
@@ -151,6 +156,13 @@ function nextRound() {
   state.msg = null;
   render();
   say(multiplier() > 1 ? "Final round. Every answer counts double." : "Next question. Verify before you answer.", null);
+  if (multiplier() > 1) {
+    // Final round: tension cue, then the loop comes back faster
+    const len = Sound.tension();
+    setTimeout(() => { if (!state.roundDone) Sound.startMusic({ tempo: 120 }); }, len * 1000);
+  } else {
+    Sound.startMusic();
+  }
   $("guess-input").focus();
 }
 
@@ -166,9 +178,38 @@ $("restart-btn").addEventListener("click", () => {
   state = newGame();
   render();
   say("New lot on the bench. Let's go.", null);
+  Sound.startMusic();
+});
+
+/* ---------- Sound toggle ---------- */
+function renderSoundBtn() {
+  const m = Sound.isMuted();
+  $("sound-btn").textContent = m ? "Sound off" : "Sound on";
+  $("sound-btn").setAttribute("aria-pressed", String(!m));
+}
+$("sound-btn").addEventListener("click", () => {
+  Sound.unlock();
+  Sound.setMuted(!Sound.isMuted());
+  renderSoundBtn();
+});
+
+/* ---------- Show open ----------
+   Browsers only allow audio after a tap, so the show starts from a button.
+   The intro plays, then the background loop starts under round 1. */
+$("start-btn").addEventListener("click", () => {
+  Sound.unlock();
+  $("curtain").hidden = true;
+  $("guess-input").disabled = false;
+  $("guess-btn").disabled = false;
+  const len = Sound.intro();
+  setTimeout(() => { if (!state.roundDone && !state.finished) Sound.startMusic(); }, len * 1000);
+  $("guess-input").focus();
 });
 
 /* ---------- Boot ---------- */
 state = newGame();
 render();
 say("Welcome to the floor. Type your best answer.", null);
+renderSoundBtn();
+$("guess-input").disabled = true;     // until the show starts
+$("guess-btn").disabled = true;
