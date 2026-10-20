@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Quality Showdown: a survey-style game show about quality inspection in manufacturing.">
+<title>Quality Showdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Barlow+Semi+Condensed:ital,wght@0,500;0,700;1,500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <section class="stage" id="stage" aria-label="Quality Showdown stage with host Marcus Faulkner">
+    <img src="assets/stage.webp" alt="Host Marcus Faulkner pointing from the Quality Showdown podium on a factory-floor game show set">
+    <div class="ov" id="ov-round"><b id="round-label">1/5</b></div>
+    <div class="ov" id="ov-score"><b id="score">0</b></div>
+    <div class="ov" id="ov-best"><b id="best">0</b></div>
+    <div class="strike" id="s0" aria-hidden="true"></div>
+    <div class="strike" id="s1" aria-hidden="true"></div>
+    <div class="strike" id="s2" aria-hidden="true"></div>
+    <div class="react" id="react" aria-hidden="true">✓</div>
+  </section>
+
+  <div class="panel msg" id="bubble" role="status" aria-live="polite">Welcome to the floor. Type your best answer.</div>
+
+  <section class="panel question">
+    <div class="eyebrow" id="eyebrow">We surveyed 100 inspectors</div>
+    <h1 id="question">Loading…</h1>
+  </section>
+
+  <section class="panel board" id="board" aria-label="Answer board"></section>
+
+  <section class="controls" id="controls">
+    <form class="guess" id="guess-form" autocomplete="off">
+      <input id="guess-input" type="text" placeholder="Your answer…" maxlength="40" enterkeyhint="send" aria-label="Your answer">
+      <button type="submit" id="guess-btn">Submit</button>
+    </form>
+    <div class="row"><button type="button" class="ghost" id="action-btn">Give up round</button></div>
+  </section>
+
+  <section class="panel final" id="final" hidden>
+    <h2>Final inspection</h2>
+    <div class="big" id="final-score">0</div>
+    <div class="stamp" id="final-stamp">PASS</div>
+    <div id="final-note"></div>
+    <button type="button" class="gold" id="restart-btn">Run another lot</button>
+  </section>
+
+  <footer class="foot">
+    <div class="ethics">Ethics is what happens when nobody is watching.</div>
+    <div class="values">Quality | Integrity | Long-term impact</div>
+    <small>Survey numbers are made-up estimates for the prototype. Last round counts double.</small>
+  </footer>
+</div>
+
+<div class="bigx" id="bigx" aria-hidden="true">X</div>
+
+<!-- Load order matters: data, then matching helpers, then game logic -->
+<script src="js/questions.js"></script>
+<script src="js/matching.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

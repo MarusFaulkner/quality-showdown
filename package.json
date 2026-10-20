@@ -1,0 +1,12 @@
+{
+  "name": "quality-showdown",
+  "version": "1.0.0",
+  "description": "Survey-style quality inspection game show. Plain HTML/CSS/JS, no build step.",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "start": "python3 -m http.server 8000"
+  },
+  "author": "Marcus Faulkner",
+  "license": "MIT"
+}
