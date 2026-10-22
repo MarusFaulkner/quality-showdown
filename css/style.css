@@ -359,6 +359,50 @@ button.gold { background: linear-gradient(var(--gold-hi), var(--gold) 60%, #c88a
   .face { padding: 0 7px; gap: 6px; }
   .msg { font-size: 18px; }
 }
+/* ---------- Phone landscape / fullscreen ----------
+   Short, wide screens (a phone turned sideways, or itch.io fullscreen) can't fit
+   the stacked layout: the stage alone is taller than the screen. Here the stage
+   is sized from the screen HEIGHT and pinned on the left, and the host message,
+   question, board and controls sit in a column on the right. Desktop and
+   portrait layouts are untouched. */
+@media (orientation: landscape) and (max-height: 540px) {
+  .wrap {
+    --gap: 8px;
+    --stage-h: calc(100vh - 2 * var(--gap));                 /* fallback */
+    --stage-w: calc(var(--stage-h) * 1086 / 990);
+    max-width: none;
+    padding-block: var(--gap);
+    grid-template-columns: min(var(--stage-w), 52vw) minmax(0, 1fr);
+    align-items: start;
+    column-gap: 14px;
+    row-gap: 8px;
+  }
+  @supports (height: 100dvh) {
+    .wrap { --stage-h: calc(100dvh - 2 * var(--gap)); }
+  }
+  .stage {
+    grid-column: 1;
+    grid-row: 1 / span 8;
+    position: sticky;
+    top: var(--gap);
+    width: 100%;
+  }
+  .wrap > :not(.stage) { grid-column: 2; }
+  .msg { margin-top: 0; min-height: 0; padding: 8px 12px; font-size: 17px; }
+  .question { padding: 8px 12px 10px; }
+  .question h1 { font-size: clamp(17px, 2.6vw, 22px); }
+  .board { gap: 6px; padding: 8px; }
+  .tile { height: 42px; }
+  .back .ans { font-size: 14px; }
+  .back .pts { font-size: 16px; }
+  .front .num { width: 28px; height: 28px; font-size: 15px; }
+  #guess-input { padding: 9px 12px; font-size: 17px; }
+  button { padding: 9px 14px; font-size: 16px; }
+  button.ghost { font-size: 14px; }
+  .foot { padding: 8px 12px; }
+  .foot .ethics { font-size: 16px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tile-inner, .react, .strike { transition: none; }
   .stage.bad { animation: none; }
