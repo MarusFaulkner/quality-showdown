@@ -5,6 +5,12 @@
 A survey-style game show about quality inspection in manufacturing, hosted by Marcus Faulkner. Players guess the most common answers to shop-floor questions (line audits, NCRs, first article inspection, gauge calibration) before they collect three strikes.
 
 It is plain HTML, CSS and JavaScript. There is no build step and nothing to install, so it runs from any static host, including GitHub Pages and itch.io.
+## Play
+
+🎮 **Play Quality Showdown:**  
+[https://marusfaulkner.github.io/quality-showdown/](https://marusfaulkner.github.io/quality-showdown/)
+
+Works in your browser. No install, no account, no build step.
 
 <img src="docs/screenshot.jpg" alt="Quality Showdown gameplay on a phone" width="320">
 
