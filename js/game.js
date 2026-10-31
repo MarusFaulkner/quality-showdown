@@ -131,7 +131,7 @@ function endRound(reason) {
     }
   });
   const msgs = {
-    cleared: ["Board cleared. That's what verified work looks like.", "good", "cheer"],
+    cleared: ["Board cleared. That's verified work.", "good", "cheer"],
     strikes: ["Three strikes. Here's what the survey said.", "bad", "shock"],
     gaveup:  ["Fair call. Here's the rest of the board.", null, "crossed"]
   };
@@ -190,7 +190,7 @@ function nextRound() {
   state.roundDone = false;
   state.msg = null;
   render();
-  say(multiplier() > 1 ? "Final round. Every answer counts double." : "Next question. Verify before you answer.", null, multiplier() > 1 ? "crossed" : "point");
+  say(multiplier() > 1 ? "Final round. Every answer counts double." : "Next question. Verify, then answer.", null, multiplier() > 1 ? "crossed" : "point");
   if (multiplier() > 1) {
     // Final round: tension cue, then the loop comes back faster
     const len = Sound.tension();
@@ -244,7 +244,7 @@ $("start-btn").addEventListener("click", () => {
   Sound.unlock();
   $("curtain").hidden = true;
   $("host").classList.remove("offstage");
-  say("Round one. We surveyed 100 inspectors. Type your best answer.", null, "point");
+  say("Round one. We surveyed 100 inspectors. Your answer?", null, "point");
   $("guess-input").disabled = false;
   $("guess-btn").disabled = false;
   const len = Sound.intro();
@@ -255,7 +255,7 @@ $("start-btn").addEventListener("click", () => {
 /* ---------- Boot ---------- */
 state = newGame();
 render();
-say("Welcome to the floor. Type your best answer.", null);
+say("Welcome to the floor.", null);
 renderSoundBtn();
 $("guess-input").disabled = true;     // until the show starts
 $("guess-btn").disabled = true;

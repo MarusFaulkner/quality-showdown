@@ -25,6 +25,7 @@
 [hidden] { display: none !important; }
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
   margin: 0;
   background: radial-gradient(ellipse 90% 40% at 50% 0%, #1a3f9a66, transparent 70%), var(--night);
@@ -289,9 +290,34 @@ button.big { font-size: clamp(22px, 6vw, 28px); padding: 14px; width: 100%; }
    Put the answer box right under the question, so when the keyboard opens you still see
    the question, what you're typing and the top of the board. */
 @media (max-width: 700px) and (orientation: portrait) {
-  .stagecol { order: 0; } .msg { order: 1; } .question { order: 2; }
-  .controls { order: 3; } .board { order: 4; } .final { order: 5; } .foot { order: 6; }
-  .controls .row { margin-bottom: 2px; }
+  /* Fit stage, question, answer box and the board on the first screen. */
+  .wrap { gap: 8px; padding-top: 6px; }
+  .stagecol { order: 0; gap: 6px; }
+  .msg { order: 1; } .question { order: 2; }
+  /* The answer box stays above the board; Sound / Give up drop below it. */
+  .controls { display: contents; }
+  form.guess { order: 3; } .board { order: 4; }
+  .controls .row { order: 5; margin-top: 2px; }
+  .final { order: 6; } .foot { order: 7; }
+
+  /* Tighter camera on the stage: trim truss above the host's head and floor under the
+     podium (55px top and bottom of the 941px art). Host and podium keep their size;
+     their top offsets are re-based on the shorter frame. */
+  .stage { --stage-aspect: 1270 / 831; }
+  .host { top: -0.08%; }
+  .podium { top: 61.73%; }
+  .curtain-logo { width: 54%; }
+  .curtain button { padding-block: 9px; }
+
+  .hud .hcell { padding: 2px 4px 3px; }
+  .msg { padding: 7px 12px; font-size: 16px; line-height: 1.2; min-height: 0; }
+  .question { padding: 7px 14px 9px; gap: 2px; }
+  /* "We surveyed 100 inspectors" is already said by the host; keep the line only for double points */
+  .eyebrow:not(:has(.double)) { display: none; }
+  .eyebrow { font-size: 12.5px; }
+  .question h1 { font-size: clamp(18px, 5vw, 21px); }
+  #guess-input { padding: 10px 14px; }
+  form.guess button { padding-block: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
