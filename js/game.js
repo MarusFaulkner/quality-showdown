@@ -198,15 +198,24 @@ function nextRound() {
   } else {
     Sound.startMusic();
   }
-  $("guess-input").focus();
+  focusAnswer();
 }
+
+/* On phones, don't pop the keyboard on its own (it would cover the board); when the player
+   taps the answer box, scroll so the question and box sit at the top of what's left. */
+const TOUCH = matchMedia("(pointer: coarse)").matches;
+function focusAnswer() { if (!TOUCH) $("guess-input").focus(); }
+$("guess-input").addEventListener("focus", () => {
+  if (TOUCH && matchMedia("(orientation: portrait)").matches)
+    setTimeout(() => $("qpanel").scrollIntoView({ block: "start", behavior: "smooth" }), 300);
+});
 
 /* ---------- Wiring ---------- */
 $("guess-form").addEventListener("submit", e => {
   e.preventDefault();
   submitGuess($("guess-input").value);
   $("guess-input").value = "";
-  $("guess-input").focus();
+  $("guess-input").focus();          // keep the keyboard up between guesses
 });
 $("action-btn").addEventListener("click", () => state.roundDone ? nextRound() : endRound("gaveup"));
 $("restart-btn").addEventListener("click", () => {
@@ -240,7 +249,7 @@ $("start-btn").addEventListener("click", () => {
   $("guess-btn").disabled = false;
   const len = Sound.intro();
   setTimeout(() => { if (!state.roundDone && !state.finished) Sound.startMusic(); }, len * 1000);
-  $("guess-input").focus();
+  focusAnswer();
 });
 
 /* ---------- Boot ---------- */
