@@ -6,7 +6,7 @@ const $ = id => document.getElementById(id);
 
 function newGame() {
   const order = BANK.map((_, i) => i).sort(() => Math.random() - 0.5).slice(0, ROUNDS_PER_GAME);
-  return { order, round: 0, score: 0, strikes: 0, revealed: [], roundDone: false, finished: false, msg: null };
+  return { order, round: 0, score: 0, strikes: 0, revealed: [], roundDone: false, finished: false, msg: null, history: [] };
 }
 const current = () => BANK[state.order[state.round]];
 const multiplier = () => state.round === ROUNDS_PER_GAME - 1 ? 2 : 1;
@@ -16,8 +16,18 @@ const maxPossible = () => state.order.reduce((sum, qi, r) =>
 function loadBest() { try { return Number(localStorage.getItem("qs-best")) || 0; } catch { return 0; } }
 function saveBest(v) { try { localStorage.setItem("qs-best", String(v)); } catch {} }
 
+/* Host poses: the host image swaps with each reaction (art in assets/host_*.webp) */
+const POSES = ["point", "thumbs", "shock", "cheer", "crossed"];
+POSES.forEach(p => { const i = new Image(); i.src = `assets/host_${p}.webp`; });   // preload
+function setHost(pose) {
+  const h = $("host"); if (!h || h.dataset.pose === pose) return;
+  h.dataset.pose = pose; h.src = `assets/host_${pose}.webp`;
+  h.classList.remove("pop"); void h.offsetWidth; h.classList.add("pop");
+}
+
 /* Host reaction: message on the podium screen + stamp/shake on the stage art */
-function say(text, tone) {
+function say(text, tone, pose) {
+  setHost(pose || (tone === "good" ? "thumbs" : tone === "bad" ? "shock" : "point"));
   const b = $("bubble");
   b.textContent = text;
   b.className = "panel msg" + (tone ? " " + tone : "");
@@ -26,7 +36,7 @@ function say(text, tone) {
   void stage.offsetWidth;                // restart the animation
   if (tone) stage.classList.add(tone);
   $("react").textContent = tone === "bad" ? "✕" : "✓";
-  state.msg = { text, tone };
+  state.msg = { text, tone, pose };
 }
 
 /* ---------- Rendering ---------- */
@@ -71,22 +81,44 @@ function render() {
   $("final").hidden = !fin;
   $("controls").hidden = fin;
   $("board").hidden = fin;
+  $("stage").closest(".stagecol").hidden = fin;
+  $("qpanel").hidden = fin;
+  $("bubble").hidden = fin;
   if (fin) {
-    $("question").textContent = "That's the shift. Here's your score.";
-    $("eyebrow").textContent = "Final inspection";
-    $("final-score").textContent = state.score;
-    const pct = state.score / maxPossible();
-    $("final-stamp").textContent = pct >= 0.5 ? "PASS" : "REWORK";
-    $("final-stamp").className = "stamp" + (pct >= 0.5 ? "" : " fail");
+    const max = maxPossible(), pct = state.score / max, pass = pct >= 0.5;
+    const RANKS = ["Trainee", "Inspector", "Quality Specialist", "Quality Champion", "MISTER QUALITY"];
+    const clearedN = state.history.filter(h => h.cleared).length;
+    let k = pct >= .85 ? 4 : pct >= .65 ? 3 : pct >= .5 ? 2 : pct >= .3 ? 1 : 0;
+    if (k === 4 && clearedN < 3) k = 3;            // the top title also needs at least 3 full boards
     const best = loadBest();
-    $("final-note").textContent = state.score >= best ? "New best score!" : `Best so far: ${best}`;
+    $("endhero").classList.toggle("rework", !pass);
+    $("end-img").src = pass ? "assets/end_pass.webp" : "assets/end_rework.webp";
+    $("end-img").alt = pass ? "Mister Quality celebrating at the podium" : "Mister Quality disappointed at the podium";
+    $("final-stamp").textContent = pass ? "PASS" : "REWORK";
+    $("final-sub").textContent = pass ? "Lot accepted · final inspection" : "Lot on hold · final inspection";
+    $("rank-name").textContent = RANKS[k];
+    $("ladder").innerHTML = RANKS.map((r, i) => `<span class="${i === k ? "on" : ""}">${r}</span>`).join("");
+    $("final-score").textContent = state.score;
+    $("final-note").textContent = state.score >= best && state.score > 0 ? "New best score!" : `Score · best ${best}`;
+    $("final-pct").textContent = Math.round(pct * 100) + "%";
+    const found = state.history.reduce((a, h) => a + h.found, 0), total = state.history.reduce((a, h) => a + h.total, 0);
+    $("final-found").textContent = `${found}/${total}`;
+    $("final-cleared").textContent = `${state.history.filter(h => h.cleared).length}/${ROUNDS_PER_GAME}`;
+    const rc = $("recap"); rc.innerHTML = "";
+    state.history.forEach(h => {
+      const row = document.createElement("div"); row.className = "rq";
+      const q = document.createElement("div"); q.className = "q"; q.textContent = h.q;
+      const a = document.createElement("div"); a.className = "a" + (h.top ? "" : " ok"); a.textContent = h.top || "Board cleared ✓";
+      const sc = document.createElement("div"); sc.className = "s"; sc.textContent = h.top ? h.topPts : "";
+      row.append(q, a, sc); rc.appendChild(row);
+    });
     renderHud();
-    say(pct >= 0.5 ? "Solid work. That's a lot I'd sign off on." : "Not bad, but this lot needs rework. Run it again.", pct >= 0.5 ? "good" : null);
+    scrollTo(0, 0);
     return;
   }
   renderBoard();
   renderHud();
-  if (state.msg) say(state.msg.text, state.msg.tone);
+  if (state.msg) say(state.msg.text, state.msg.tone, state.msg.pose);
 }
 
 /* ---------- Actions ---------- */
@@ -99,11 +131,14 @@ function endRound(reason) {
     }
   });
   const msgs = {
-    cleared: ["Board cleared. That's what verified work looks like.", "good"],
-    strikes: ["Three strikes. Here's what the survey said.", "bad"],
-    gaveup:  ["Fair call. Here's the rest of the board.", null]
+    cleared: ["Board cleared. That's what verified work looks like.", "good", "cheer"],
+    strikes: ["Three strikes. Here's what the survey said.", "bad", "shock"],
+    gaveup:  ["Fair call. Here's the rest of the board.", null, "crossed"]
   };
   say(...msgs[reason]);
+  const q = current(), missed = q.a.map((a, i) => i).filter(i => !state.revealed.includes(i));
+  state.history.push({ q: q.q, found: state.revealed.length, total: q.a.length, cleared: reason === "cleared",
+    top: missed.length ? q.a[missed[0]][0] : null, topPts: missed.length ? q.a[missed[0]][1] : 0 });
   Sound.stopMusic();
   if (reason === "cleared") setTimeout(Sound.win, 450);   // let the last DING ring first
   renderHud();
@@ -124,7 +159,7 @@ function submitGuess(raw) {
     const pts = q.a[i][1] * multiplier();
     state.score += pts;
     const t = $("tile-" + i);
-    if (t) t.classList.add("open");
+    if (t) { t.classList.add("open", "flash"); }
     Sound.ding();
     say(`Survey says… "${q.a[i][0]}"! +${pts}`, "good");
     renderHud();
@@ -155,11 +190,11 @@ function nextRound() {
   state.roundDone = false;
   state.msg = null;
   render();
-  say(multiplier() > 1 ? "Final round. Every answer counts double." : "Next question. Verify before you answer.", null);
+  say(multiplier() > 1 ? "Final round. Every answer counts double." : "Next question. Verify before you answer.", null, multiplier() > 1 ? "crossed" : "point");
   if (multiplier() > 1) {
     // Final round: tension cue, then the loop comes back faster
     const len = Sound.tension();
-    setTimeout(() => { if (!state.roundDone) Sound.startMusic({ tempo: 120 }); }, len * 1000);
+    setTimeout(() => { if (!state.roundDone) Sound.startMusic({ tempo: 124 }); }, len * 1000);
   } else {
     Sound.startMusic();
   }
@@ -199,6 +234,7 @@ $("sound-btn").addEventListener("click", () => {
 $("start-btn").addEventListener("click", () => {
   Sound.unlock();
   $("curtain").hidden = true;
+  say("Round one. We surveyed 100 inspectors. Type your best answer.", null, "point");
   $("guess-input").disabled = false;
   $("guess-btn").disabled = false;
   const len = Sound.intro();

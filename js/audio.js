@@ -21,7 +21,7 @@ const Sound = (() => {
   try { muted = localStorage.getItem(MUTE_KEY) === "1"; } catch {}
 
   // Music scheduler state
-  let musicOn = false, tempo = 96, nextNoteTime = 0, step = 0, timerId = null;
+  let musicOn = false, tempo = 108, nextNoteTime = 0, step = 0, timerId = null;
 
   /* ---------- Setup ---------- */
   function unlock() {
@@ -203,37 +203,53 @@ const Sound = (() => {
   }
 
   /* ---------- Background music ----------
-     A quiet 4-bar "thinking" loop: walking bass, offbeat keys, soft hi-hat.
+     A modern TV game-show "thinking" bed in A minor (Am – F – C – G): four-on-the-floor kick,
+     clap, offbeat hats, straight driving bass, a wide sustained synth pad, and a soft
+     16th-note arpeggio that joins on every other pass. No bouncy oom-pah bass or plucky
+     major-key melody, so it reads as studio tension, not a carnival.
      Scheduled a little ahead of time so it stays steady. */
-  const PROG = [                    // [bass root, chord tones] per bar
-    [48, [64, 67, 72]],             // C
-    [45, [64, 69, 72]],             // Am
-    [41, [65, 69, 72]],             // F
-    [43, [62, 67, 71]]              // G
+  const PROG = [                    // [bass root, pad chord] per bar
+    [33, [57, 60, 64, 69]],         // Am
+    [29, [57, 60, 65, 69]],         // F
+    [36, [55, 60, 64, 67]],         // C
+    [31, [55, 59, 62, 67]]          // G
   ];
-  const WALK = [0, 7, 12, 7];       // bass pattern per beat (semitones above root)
+  const ARP = [0, 1, 2, 3, 2, 1, 2, 3];   // index into the pad chord, one per 16th (an octave up)
+  const STEPS = 16 * 8;             // 8 bars: 4 bed, 4 bed + arpeggio
 
-  function scheduleBeat(beat, time) {
-    const spb = 60 / tempo;
-    const [root, chord] = PROG[Math.floor(beat / 4) % 4];
-    tone(hz(root + WALK[beat % 4]), time, spb * 0.9, { type: "triangle", gain: 0.5, release: 0.08, dest: musicBus });
-    // keys on the "and" of each beat
-    chord.forEach(n => tone(hz(n), time + spb / 2, spb * 0.35, { type: "triangle", gain: 0.1, release: 0.1, dest: musicBus }));
-    noise(time + spb / 2, 0.05, { freq: 8000, gain: 0.05, dest: musicBus });
-    if (beat % 2 === 1) noise(time, 0.12, { band: true, freq: 1800, gain: 0.08, dest: musicBus });  // snare-ish
+  function scheduleStep(i, time) {
+    const s16 = 60 / tempo / 4, k = i % 16, barN = Math.floor(i / 16), bar = barN % 4, M = musicBus;
+    const [root, chord] = PROG[bar];
+    // kick on every beat, clap on 2 and 4, hats on the offbeat 8ths
+    if (k % 4 === 0) tone(140, time, 0.18, { type: "sine", gain: 0.5, glideTo: 40, attack: 0.002, release: 0.12, dest: M });
+    if (k === 4 || k === 12) noise(time, 0.12, { band: true, freq: 1700, gain: 0.1, dest: M });
+    if (k % 4 === 2) noise(time, 0.04, { freq: 8000, gain: 0.045, dest: M });
+    // snare build into the top of the loop
+    if (barN === 7 && k >= 8) noise(time, 0.05, { band: true, freq: 2000, gain: 0.03 + (k - 8) * 0.008, dest: M });
+    // straight 8th-note bass
+    if (k % 2 === 0) tone(hz(root), time, s16 * 1.7, { type: "sawtooth", gain: 0.17, attack: 0.005, release: 0.06, filter: 480, dest: M });
+    // sustained pad, one chord per bar
+    if (k === 0) chord.forEach((n, j) => {
+      const len = s16 * 16;
+      tone(hz(n), time, len, { type: "sawtooth", gain: 0.022, attack: 0.25, release: 0.4, filter: 1100, detune: j % 2 ? 7 : -7, dest: M });
+    });
+    // soft arpeggio on the second pass
+    if (i >= 64) tone(hz(chord[ARP[k % 8]] + 12), time, s16 * 0.8, { type: "triangle", gain: 0.05, attack: 0.004, release: 0.05, filter: 2800, dest: M });
+    // swell at the top of each 8-bar pass
+    if (i === 0) noise(time, 1.4, { freq: 5000, gain: 0.035, dest: M });
   }
 
   function scheduler() {
     while (nextNoteTime < now() + 0.12) {
-      scheduleBeat(step, nextNoteTime);
-      nextNoteTime += 60 / tempo;
-      step = (step + 1) % 16;
+      scheduleStep(step, nextNoteTime);
+      nextNoteTime += 60 / tempo / 4;
+      step = (step + 1) % STEPS;
     }
   }
 
   function startMusic(opts = {}) {
     if (!ready()) return;
-    tempo = opts.tempo || 96;
+    tempo = opts.tempo || 108;
     if (!musicOn) {
       musicOn = true;
       step = 0;

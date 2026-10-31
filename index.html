@@ -3,36 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Quality Showdown: a survey-style game show about quality inspection in manufacturing.">
 <title>Quality Showdown</title>
+<meta name="description" content="Quality Showdown: a survey-style game show about quality inspection in manufacturing, hosted by Mister Quality.">
+<meta name="theme-color" content="#050d26">
+<meta property="og:title" content="Quality Showdown">
+<meta property="og:description" content="We surveyed 100 inspectors. Can you match their top answers?">
+<meta property="og:image" content="assets/end_pass.webp">
+<link rel="icon" href="assets/logo.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Barlow+Semi+Condensed:ital,wght@0,500;0,700;1,500&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Barlow:wght@500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="wrap">
-  <section class="stage" id="stage" aria-label="Quality Showdown stage with host Marcus Faulkner">
-    <img src="assets/stage.webp" alt="Host Marcus Faulkner pointing from the Quality Showdown podium on a factory-floor game show set">
-    <div class="ov" id="ov-round"><b id="round-label">1/5</b></div>
-    <div class="ov" id="ov-score"><b id="score">0</b></div>
-    <div class="ov" id="ov-best"><b id="best">0</b></div>
-    <div class="strike" id="s0" aria-hidden="true"></div>
-    <div class="strike" id="s1" aria-hidden="true"></div>
-    <div class="strike" id="s2" aria-hidden="true"></div>
-    <div class="react" id="react" aria-hidden="true">✓</div>
-    <div class="curtain" id="curtain">
-      <button type="button" class="gold" id="start-btn">Start the show</button>
+  <div class="stagecol">
+    <div class="hud" id="hud" aria-label="Scoreboard">
+      <div class="hcell"><span class="k">Round</span><b id="round-label">1/5</b></div>
+      <div class="hcell"><span class="k">Score</span><b id="score">0</b></div>
+      <div class="hcell"><span class="k">Best</span><b id="best">0</b></div>
+      <div class="hcell strikes"><span class="k">Strikes</span>
+        <div class="xs"><i class="strike" id="s0">✕</i><i class="strike" id="s1">✕</i><i class="strike" id="s2">✕</i></div></div>
     </div>
-  </section>
+    <section class="stage" id="stage" aria-label="Quality Showdown stage with host Mister Quality">
+      <img class="stage-bg" src="assets/stage.webp" alt="">
+      <img class="host" id="host" src="assets/host_point.webp" alt="Mister Quality, the host">
+      <img class="podium" src="assets/podium.webp" alt="">
+      <div class="react" id="react" aria-hidden="true">✓</div>
+      <div class="curtain" id="curtain">
+        <img class="curtain-logo" src="assets/logo.webp" alt="Quality Showdown">
+        <p class="tag">Survey says… inspect it right.</p>
+        <button type="button" class="gold" id="start-btn">Start the show</button>
+      </div>
+    </section>
+  </div>
 
   <div class="panel msg" id="bubble" role="status" aria-live="polite">Welcome to the floor. Type your best answer.</div>
 
-  <section class="panel question">
+  <section class="panel question" id="qpanel">
     <div class="eyebrow" id="eyebrow">We surveyed 100 inspectors</div>
     <h1 id="question">Loading…</h1>
   </section>
 
-  <section class="panel board" id="board" aria-label="Answer board"></section>
+  <section class="board" id="board" aria-label="Answer board"></section>
 
   <section class="controls" id="controls">
     <form class="guess" id="guess-form" autocomplete="off">
@@ -45,22 +58,37 @@
     </div>
   </section>
 
-  <section class="panel final" id="final" hidden>
-    <h2>Final inspection</h2>
-    <div class="big" id="final-score">0</div>
-    <div class="stamp" id="final-stamp">PASS</div>
-    <div id="final-note"></div>
-    <button type="button" class="gold" id="restart-btn">Run another lot</button>
+  <section class="final" id="final" hidden>
+    <div class="endhero" id="endhero">
+      <img id="end-img" src="assets/end_pass.webp" alt="">
+      <div class="endtitle"><b id="final-stamp">PASS</b><span id="final-sub">Final inspection</span></div>
+    </div>
+    <div class="panel rankp">
+      <div class="k">Show rank</div>
+      <div class="rankname" id="rank-name">Inspector</div>
+      <div class="ladder" id="ladder"></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b id="final-score">0</b><span id="final-note">Final score</span></div>
+      <div class="kpi"><b id="final-pct">0%</b><span>Of the possible points</span></div>
+      <div class="kpi"><b id="final-found">0</b><span>Answers found</span></div>
+      <div class="kpi"><b id="final-cleared">0</b><span>Boards cleared</span></div>
+    </div>
+    <div class="panel recap">
+      <h2>Top answers you missed</h2>
+      <div id="recap"></div>
+    </div>
+    <button type="button" class="gold big" id="restart-btn">Run another lot</button>
   </section>
 
   <footer class="foot">
     <div class="ethics">Ethics is what happens when nobody is watching.</div>
     <div class="values">Quality | Integrity | Long-term impact</div>
-    <small>Survey numbers are made-up estimates for the prototype. Last round counts double.</small>
+    <small>Survey results are illustrative, built from common shop-floor answers. The last round counts double.<br>© 2026 Marcus Faulkner · Quality Showdown · Mister Quality™</small>
   </footer>
 </div>
 
-<div class="bigx" id="bigx" aria-hidden="true">X</div>
+<div class="bigx" id="bigx" aria-hidden="true">✕</div>
 
 <!-- Load order matters: data, sound, matching helpers, then game logic -->
 <script src="js/questions.js"></script>
