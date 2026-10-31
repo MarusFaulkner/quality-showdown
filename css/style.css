@@ -87,6 +87,7 @@ img { max-width: 100%; display: block; }
 }
 .stage > .stage-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .host { position: absolute; left: var(--host-left); top: var(--host-top); width: var(--host-width); max-width: none; transform-origin: 50% 80%; }
+.host.offstage { visibility: hidden; }   /* empty stage behind the title card */
 .host.pop { animation: hostpop .35s cubic-bezier(.3,1.5,.5,1); }
 @keyframes hostpop { from { transform: translateY(3%) scale(.97); } to { transform: none; } }
 .podium { position: absolute; left: var(--pod-left); top: var(--pod-top); width: var(--pod-width); max-width: none; pointer-events: none; }

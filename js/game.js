@@ -234,6 +234,7 @@ $("sound-btn").addEventListener("click", () => {
 $("start-btn").addEventListener("click", () => {
   Sound.unlock();
   $("curtain").hidden = true;
+  $("host").classList.remove("offstage");
   say("Round one. We surveyed 100 inspectors. Type your best answer.", null, "point");
   $("guess-input").disabled = false;
   $("guess-btn").disabled = false;
